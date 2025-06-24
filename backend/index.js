@@ -1,59 +1,67 @@
-//create express app
 const exp = require("express");
 const app = exp();
 const path = require("path");
+const cors = require("cors");
 require("dotenv").config();
-//add body parser middleware
-app.use(exp.json());
-//place react build in http web server
-app.use(exp.static(path.join(__dirname, '../frontend/build')));
-
-
-
 const mongoClient = require("mongodb").MongoClient;
 
-//connect tp mongodb server
-mongoClient
-  .connect(process.env.DB_URL)
+// CORS to allow frontend access
+app.use(cors({
+  origin: "http://localhost:5173", // frontend URL
+  credentials: true
+}));
+
+// Body parser
+app.use(exp.json());
+
+// Serve static files from React build (optional, for production only)
+const publicPath = path.join(__dirname, '../my-react-tailwind/public');
+app.use(exp.static(publicPath));
+
+// Connect to MongoDB
+mongoClient.connect(process.env.MONGODB_URI)
   .then((client) => {
-    //get database object
     const blogDBobj = client.db("blogdbb2");
-    //create collection objects
     const usersCollection = blogDBobj.collection("users");
     const authorsCollection = blogDBobj.collection("authors");
     const articlesCollection = blogDBobj.collection("articles");
 
-    //share collection objs with APIs
     app.set("usersCollection", usersCollection);
     app.set("authorsCollection", authorsCollection);
     app.set("articlesCollection", articlesCollection);
-    console.log("DB connection success");
+
+    console.log("✅ DB connection success");
   })
   .catch((err) => {
-    console.log("Err in DB connect", err);
+    console.error("❌ Error connecting to DB:", err);
   });
 
-//import apis
+// Import route modules
 const userApp = require("./APIs/user-api");
 const authorApp = require("./APIs/author-api");
 const adminApp = require("./APIs/admin-api");
 
-//handover req to specific route based on starting of path
+// Mount APIs
 app.use("/user-api", userApp);
 app.use("/author-api", authorApp);
 app.use("/admin-api", adminApp);
 
-//deals with page refresh
-app.use((req,res,next)=>{
-  res.sendFile(path.join(__dirname,'../frontend/build/index.html'))
-})
-//error handling middeware
-app.use((err, req, res, next) => {
-  res.send({ status: "error", message: err.message });
+// Handle refresh for React frontend (optional: only for production)
+app.get('*', (req, res, next) => {
+  try {
+    res.sendFile(path.join(publicPath, 'index.html'));
+  } catch (err) {
+    console.error("❌ Error sending index.html:", err);
+    next(err);
+  }
 });
 
-//get port number from env
-const port = process.env.PORT || 4000;
+// Global error handler
+app.use((err, req, res, next) => {
+  console.error("❌ Global error handler:", err);
+  res.status(500).send({ status: "error", message: err.message });
+});
 
-//assign port number to http server
-app.listen(port, () => console.log(`http server on port ${port}`));
+// Start the server
+const port = process.env.PORT || 4000;
+app.listen(port, () => console.log(`🚀 HTTP server running on port ${port}`));
