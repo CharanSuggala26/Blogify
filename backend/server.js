@@ -2,13 +2,13 @@ const exp=require('express')
 require('dotenv').config()
 const cors=require('cors')
 const {MongoClient}=require('mongodb')
-
+const blogsApp=require('./APIs/blogs')
 
 const app=exp()
 const port=process.env.PORT
 
 app.use(cors())
-//app.use(express.json())
+app.use(exp.json())
 
 const client = new MongoClient(process.env.DB_URI);
 
@@ -25,6 +25,8 @@ client
     console.error("Error connecting database: ",error);
 });
 
+
+app.use('/blogs',blogsApp);
 
 app.listen(port,()=>{
     console.log(`server is running on port : ${port}`);

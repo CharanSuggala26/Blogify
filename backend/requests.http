@@ -1,0 +1,14 @@
+### add a blog
+POST http://localhost:4000/blogs/add
+Content-Type: application/json
+
+{
+    "title":"War 2",
+    "content":"The story of 2 super heroes from india fighting for the nation.",
+    "author":"Ayan Mukherji"
+}
+
+### to get all the blogs
+GET http://localhost:4000/blogs
+Content-Type: application/json
+
