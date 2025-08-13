@@ -32,4 +32,14 @@ blogsApp.get('/get/:id',(req,res)=>{
     })
 })
 
+blogsApp.get('/update/:id',(req,res)=>{
+    const blogCollection=req.app.get("blogCollection");
+    const data=blogCollection.updateOne({bloggerId:req.params.id},{$set:{title:req.body.title,content:req.body.content}});
+    data.then((data)=>{
+        res.status(200).send({data:data,message:"Success in updating blog"})
+    }).catch((error)=>{
+        res.status(400).send({message:"Error"})
+    })
+})
+
 module.exports=blogsApp;
