@@ -78,7 +78,7 @@ const Home = () => {
   {blogs.length > 0 ? (
     blogs.map((blog, index) => (
       <div className="col" key={index}>
-        <div className="card h-100 shadow-sm">
+        <div className="card h-100 shadow-sm border-1">
           {blog.image && (
             <img
               src={blog.image}
@@ -91,9 +91,9 @@ const Home = () => {
             <h5 className="card-title">{blog.title}</h5>
             <p className="card-text flex-grow-1">{blog.content}</p>
           </div>
-          <div className="card-footer text-muted">
-            By {blog.author} {blog.date && `• ${blog.date}`}
-          </div>
+          <button className="btn btn-primary">Add</button>
+          <button className="btn btn-danger">Delete</button>
+          <button className="btn btn-blue">Edit</button>
         </div>
       </div>
     ))
